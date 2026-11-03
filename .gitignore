@@ -1,0 +1,18 @@
+node_modules/
+dist/
+data/
+*.db
+*.db-shm
+*.db-wal
+.env
+.env.*
+!.env.example
+*.log
+coverage/
+.DS_Store
+
+# local agent tooling
+.claude/
+.agents/
+CLAUDE.md
+skills-lock.json

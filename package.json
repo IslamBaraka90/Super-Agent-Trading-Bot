@@ -1,0 +1,46 @@
+{
+  "name": "super-agent-trading-bot",
+  "version": "0.1.0",
+  "description": "An always-on, event-driven LLM trading agent built on the Super-agent architecture: one Router, many Workers, event triggers, async tools, a separate execution endpoint and a watchdog. Signal alerts or autonomous paper trading, with any LLM provider.",
+  "type": "module",
+  "license": "MIT",
+  "author": "Islam Baraka",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/IslamBaraka90/Super-Agent-Trading-Bot.git"
+  },
+  "keywords": [
+    "trading-bot",
+    "ai-agent",
+    "llm",
+    "super-agent",
+    "multi-agent",
+    "paper-trading",
+    "crypto",
+    "binance",
+    "typescript",
+    "event-driven"
+  ],
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "start": "node --disable-warning=ExperimentalWarning dist/main.js",
+    "dev": "node --disable-warning=ExperimentalWarning --import tsx src/main.ts",
+    "endpoint": "node --disable-warning=ExperimentalWarning dist/endpoint-main.js",
+    "endpoint:dev": "node --disable-warning=ExperimentalWarning --import tsx src/endpoint-main.ts",
+    "test": "node --disable-warning=ExperimentalWarning --import tsx --test \"test/**/*.test.ts\""
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "openai": "^7.47.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3"
+  }
+}
