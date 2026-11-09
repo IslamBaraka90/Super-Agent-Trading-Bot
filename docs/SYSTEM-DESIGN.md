@@ -326,8 +326,8 @@ picks its own provider and model from the environment and falls back to
 | `*_PROVIDER` | SDK | Notes |
 |---|---|---|
 | `anthropic` | `@anthropic-ai/sdk` | Prompt caching on, server-side refusal fallback on (`ANTHROPIC_FALLBACKS`), reasoning blocks replayed unchanged |
-| `openai` | `openai` | api.openai.com |
-| `deepseek`, `groq`, `openrouter`, `xai`, `gemini`, `mistral`, `together`, `ollama` | `openai` | OpenAI-compatible presets with their base URL and key variable |
+| `openai` | `openai` | Responses API, because current reasoning models refuse function tools on Chat Completions; stateless, with reasoning items replayed from their encrypted form |
+| `deepseek`, `groq`, `openrouter`, `xai`, `gemini`, `mistral`, `together`, `ollama` | `openai` | Chat Completions presets with their base URL and key variable |
 | `openai-compatible` | `openai` | Any other endpoint via `LLM_BASE_URL` |
 | `mock` | none | Deterministic scripted model for tests and offline demos |
 

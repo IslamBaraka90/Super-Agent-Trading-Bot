@@ -50,7 +50,11 @@ export function buildRouterTools(rt: Runtime): ToolRegistry {
   const reply = defineTool({
     name: "reply",
     description: "Reply to a person on the channel (and target) their message came from.",
-    schema: z.object({ channel: z.string(), target: z.string().optional(), text: z.string().min(1) }),
+    schema: z.object({
+      channel: z.string(),
+      target: z.string().optional().describe("Copy the trigger's target attribute exactly. Omit it when the trigger has none."),
+      text: z.string().min(1),
+    }),
     run: async ({ channel, target, text }) => {
       const id = await rt.hub.send(channel, text, target, "router");
       return `Sent (${id}).`;

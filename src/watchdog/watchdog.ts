@@ -96,7 +96,11 @@ export class Watchdog {
     const reply = defineTool({
       name: "reply",
       description: "Answer the owner on the channel and target their /watchdog message came from.",
-      schema: z.object({ channel: z.string(), target: z.string().optional(), text: z.string().min(1) }),
+      schema: z.object({
+        channel: z.string(),
+        target: z.string().optional().describe("Copy the trigger's target attribute exactly. Omit it when the trigger has none."),
+        text: z.string().min(1),
+      }),
       run: async ({ channel, target, text }) => `Sent (${await this.rt.hub.send(channel, text, target, "watchdog")}).`,
     });
     const rt = this.rt;

@@ -292,7 +292,7 @@ export function buildWorkerTools(rt: Runtime, workerId: string, kind: WorkerKind
         rt.store.putObject({
           id: p.id,
           kind: "position",
-          summary: `${input.side} ${input.symbol} @ ${fmtPrice(p.entryPrice)} stop ${fmtPrice(input.stop)}${input.target ? ` target ${fmtPrice(input.target)}` : ""}`,
+          summary: positionSummary(input.side, input.symbol, p.entryPrice, input.stop, input.target),
           body: { ...p, rationale: input.rationale },
           links: [workerId, thread, ...(input.timeframe ? [marketThread(input.symbol, input.timeframe)] : [])],
           status: "open",
@@ -306,7 +306,10 @@ export function buildWorkerTools(rt: Runtime, workerId: string, kind: WorkerKind
           false,
           [p.id],
         );
-        return { ...p, note: `You are now subscribed to ${thread}${input.timeframe ? ` and ${marketThread(input.symbol, input.timeframe)}` : ""}.` };
+        return {
+          ...p,
+          note: `The Router already has this entry, so do not report it. You are now subscribed to ${thread}${input.timeframe ? ` and ${marketThread(input.symbol, input.timeframe)}` : ""}.`,
+        };
       },
     });
 
@@ -316,7 +319,19 @@ export function buildWorkerTools(rt: Runtime, workerId: string, kind: WorkerKind
       schema: z.object({ position_id: z.string(), stop: z.number().positive().optional(), target: z.number().positive().optional() }),
       run: async ({ position_id, stop, target }) => {
         const result = await rt.endpoint.call<{ ok: boolean; reason?: string }>("broker.updateBrackets", { id: position_id, stop, target });
-        return result.ok ? "Brackets updated." : `Not updated: ${result.reason}`;
+        if (!result.ok) return `Not updated: ${result.reason}`;
+        // Keep the recallable object in step with the broker, or later readers see the old levels.
+        const p = await rt.endpoint.call<{ side: string; symbol: string; entryPrice: number; stop: number; target: number | null } | null>(
+          "broker.position",
+          { id: position_id },
+        );
+        if (p) {
+          rt.store.updateObject<Record<string, unknown>>(position_id, {
+            summary: positionSummary(p.side, p.symbol, p.entryPrice, p.stop, p.target),
+            body: { stop: p.stop, target: p.target },
+          });
+        }
+        return "Brackets updated.";
       },
     });
 
@@ -336,6 +351,10 @@ export function buildWorkerTools(rt: Runtime, workerId: string, kind: WorkerKind
   }
 
   return new ToolRegistry(tools, rt.store);
+}
+
+function positionSummary(side: string, symbol: string, entry: number, stop: number, target?: number | null): string {
+  return `${side} ${symbol} @ ${fmtPrice(entry)} stop ${fmtPrice(stop)}${target ? ` target ${fmtPrice(target)}` : ""}`;
 }
 
 export function describeTask(req: { task: string; symbol?: string; timeframe?: string }): string {

@@ -6,6 +6,7 @@ import { Store } from "../src/state/store.js";
 import { ExecutionEndpoint } from "../src/endpoint/endpoint.js";
 import { LocalEndpointClient } from "../src/endpoint/client.js";
 import { MockLlm } from "../src/llm/mock.js";
+import { buildWorkerTools } from "../src/workers/tools.js";
 import type { Config, LlmRole } from "../src/config.js";
 import { CaptureChannel, FixedMarket, settle, testConfig, trendCandles } from "./helpers.js";
 
@@ -115,6 +116,22 @@ test("autonomous mode: opens a paper position, the bracket stop closes it, the w
   assert.equal(endpoint.broker.position(position.id)!.exitReason, "stop_hit");
   assert.equal(rt.store.getSession(owner)!.status, "done", "worker finished after its position closed");
   assert.equal(rt.threads.subscribers(`pos:${position.id}`).length, 0);
+  await rt.stop();
+});
+
+test("moving a bracket keeps the recallable position in step with the broker", async () => {
+  const { rt, market, endpoint } = build(testConfig({ BOT_MODE: "autonomous" }));
+  await rt.start();
+  await breakout(rt, market);
+  const [position] = endpoint.broker.positions("open");
+  const owner = String(position.meta.workerId);
+  const target = position.target! * 1.01;
+  const tools = buildWorkerTools(rt, owner, "task");
+  const result = await tools.execute({ id: "1", name: "update_brackets", input: { position_id: position.id, target } }, { sessionId: owner, role: "worker" });
+  assert.equal(result.content, "Brackets updated.");
+  const stored = rt.store.getObject<{ target: number }>(position.id)!;
+  assert.equal(stored.body.target, target);
+  assert.match(stored.summary, new RegExp(`target ${String(Number(target.toFixed(4))).slice(0, 5)}`));
   await rt.stop();
 });
 

@@ -281,7 +281,8 @@ export class Runtime {
       const events = await this.endpoint.call<BrokerEvent[]>("broker.events", { since: cursor });
       for (const e of events) {
         cursor = e.seq;
-        if (e.kind === "opened") continue; // the worker that placed the order already has the fill
+        // The worker that placed the order or moved the bracket already has the result.
+        if (e.kind === "opened" || e.kind === "brackets_updated") continue;
         if (e.kind === "closed" || e.kind === "stop_hit" || e.kind === "target_hit") {
           this.store.updateObject<Record<string, unknown>>(e.positionId, { status: "closed", body: { exit: e.data } });
         }

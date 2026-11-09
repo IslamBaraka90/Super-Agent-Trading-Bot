@@ -204,7 +204,7 @@ npm test
 npm run typecheck
 ```
 
-The suite has 57 tests and needs no network or API key. It covers:
+The suite has 61 tests and needs no network or API key. It covers:
 - indicators, including the no-look-ahead check;
 - detectors and the backtester;
 - every risk rule;
@@ -218,9 +218,11 @@ The suite has 57 tests and needs no network or API key. It covers:
 ## Project status
 
 Version 0.1. The architecture is complete and tested end to end with the mock
-model and with live Binance market data. The prompts are first versions:
-expect to tune them for the model you choose, and watch the first days of
-signals before you trust the scorecard.
+model, with live Binance market data, and with real OpenAI models (GPT-6.1
+Terra, GPT-6.1 Sol and GPT-6 Luna). Other providers have not been run against
+their live APIs yet. The prompts are first versions: expect to tune them for
+the model you choose, and watch the first days of signals before you trust the
+scorecard.
 
 ## License
 

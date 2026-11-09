@@ -9,7 +9,6 @@ type ChatTool = OpenAI.Chat.Completions.ChatCompletionTool;
  * `LLM_BASE_URL` / `<ROLE>_BASE_URL` overrides the URL for any of them.
  */
 export const OPENAI_COMPATIBLE_PRESETS: Record<string, { baseUrl?: string; keyEnv?: string }> = {
-  openai: { keyEnv: "OPENAI_API_KEY" },
   deepseek: { baseUrl: "https://api.deepseek.com", keyEnv: "DEEPSEEK_API_KEY" },
   groq: { baseUrl: "https://api.groq.com/openai/v1", keyEnv: "GROQ_API_KEY" },
   openrouter: { baseUrl: "https://openrouter.ai/api/v1", keyEnv: "OPENROUTER_API_KEY" },
@@ -65,9 +64,7 @@ export class OpenAICompatibleClient implements LlmClient {
       model: this.model,
       messages: toOpenAIMessages(request.system, request.messages, this.provider),
       ...(tools.length ? { tools } : {}),
-      // OpenAI deprecated max_tokens in favour of max_completion_tokens; most
-      // compatible providers still read max_tokens.
-      ...(this.provider === "openai" ? { max_completion_tokens: maxTokens } : { max_tokens: maxTokens }),
+      max_tokens: maxTokens,
       ...(this.options.effort
         ? { reasoning_effort: this.options.effort as OpenAI.Chat.Completions.ChatCompletionCreateParams["reasoning_effort"] }
         : {}),
@@ -107,7 +104,7 @@ export class OpenAICompatibleClient implements LlmClient {
   }
 }
 
-function parseArgs(text: string): Record<string, unknown> {
+export function parseArgs(text: string): Record<string, unknown> {
   if (!text) return {};
   try {
     const value = JSON.parse(text);
